@@ -22,6 +22,7 @@ app.layout = html.Div([
     # html.Button('Add to chart', id='btn'),
     html.Div(id='graph-out'),
     html.Div(id='graph2-out'),
+    html.Div(id='dummy'),
     # dcc.Input(id='word-in', value='madness', type='text'),
     # html.Div(id='word-out', style={
     #     "color": "tomato",
@@ -29,6 +30,15 @@ app.layout = html.Div([
     #     "font-family": "Georgia"
     # })
 ])
+
+# Band-aid fix for not really grokking async stuff here:
+@app.callback(
+    Output('dummy', 'children'),
+    [Input('freq-in', 'value')],
+)
+
+def on_change(input_value):
+    return html.P(input_value)
 
 # Update the chart:
 @app.callback(
@@ -78,7 +88,8 @@ def on_click(input_value):
 
 @app.callback(
     Output('graph2-out','children'),
-    [Input('freq-in', 'value')], # We also changed this, though I think the global change was the effective one. In fact, changing it to watch the graph-1 change messed it up!
+    # Oh but this is also no good, because the values get recalculate inside of other callback...
+    [Input('graph-out', 'children')], # We also changed this, though I think the global change was the effective one. In fact, changing it to watch the graph-1 change messed it up!
 )
 # Uh oh, this ran first... Fixed with global
 def on_change(val):
@@ -96,7 +107,8 @@ def on_change(val):
         for i, val in enumerate(l['y']):
             summed_lines['y'][i] += val
 
-    print(summed_lines['y'])
+    # print(summed_lines['y'])
+    summed_lines['y'] = summed_lines['y'][summed_lines['y'].index(0) : ]
 
     return dcc.Graph(
             id = 'whatev2',
