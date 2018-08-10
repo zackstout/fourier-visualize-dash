@@ -8,22 +8,20 @@ from dash.dependencies import Input, Output, State, Event
 import dash_core_components as dcc
 import dash_html_components as html
 from collections import defaultdict
-# from flask import Flask
 import os
 
+current_lines = []
+xs = []
 
 app = dash.Dash(__name__)
 server = app.server # Adding for deployment
 
-
 app.layout = html.Div([
     html.H2('ahoy hoy'),
-    # html.Div(children='''
-    #     Speaker:
-    # '''),
     dcc.Input(id='freq-in', value=1, type='int'),
-    html.Button('Add to chart', id='btn'),
+    # html.Button('Add to chart', id='btn'),
     html.Div(id='graph-out'),
+    html.Div(id='graph2-out'),
     # dcc.Input(id='word-in', value='madness', type='text'),
     # html.Div(id='word-out', style={
     #     "color": "tomato",
@@ -37,39 +35,84 @@ app.layout = html.Div([
     Output('graph-out','children'),
     [Input('freq-in', 'value')],
 )
-# Nice, needs to take in one parameter for each input, state (and event?):
+
 def on_click(input_value):
-
-    print(input_value)
-
+    if (input_value == ''):
+        return
+    # print(input_value)
     w = 10
     n = 200
-    # n_ints = n/w
-    xs = []
     ys = []
+    y2s = []
+    global xs
+
     for x in range(n):
         xs.append(x * w / n)
         ys.append(np.sin(int(input_value) * x * w / n))
+        y2s.append(np.sin(int(input_value)/2 * x * w / n)) # Wow, it automatically gives them different colors!
 
-    data = [{
+    global current_lines # Huh, we have to say it here and when we read it..
+    # Draw wave and its half-frequency brother:
+    current_lines = [{
         'x': xs,
         'y': ys,
         'type': 'line',
         'name': 'sine'
+    }, {
+        'x': xs,
+        'y': y2s,
+        'type': 'line',
+        'name': 'sine'
     }]
-
-    # print(data[3])
-
 
     return dcc.Graph(
             id = 'whatev',
             figure = {
-                'data': data,
+                'data': current_lines,
                 'layout': {
-                    'title': 'HAMLET'
+                    'title': 'Waves'
                 }
             }
         )
+
+
+@app.callback(
+    Output('graph2-out','children'),
+    [Input('freq-in', 'value')], # We also changed this, though I think the global change was the effective one. In fact, changing it to watch the graph-1 change messed it up!
+)
+# Uh oh, this ran first... Fixed with global
+def on_change(val):
+    global current_lines
+    global xs
+    # print(current_lines)
+    summed_lines = {
+        'x': xs,
+        'y': [0] * len(xs), # Neat
+        'type': 'line',
+        'name': 'summed_sines'
+    }
+
+    for l in current_lines:
+        for i, val in enumerate(l['y']):
+            summed_lines['y'][i] += val
+
+    print(summed_lines['y'])
+
+    return dcc.Graph(
+            id = 'whatev2',
+            figure = {
+                'data': [summed_lines],
+                'layout': {
+                    'title': 'Summed Waves'
+                }
+            }
+        )
+
+
+
+
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
