@@ -23,35 +23,29 @@ app.layout = html.Div([
     html.Div(id='graph-out'),
     html.Div(id='graph2-out'),
     html.Div(id='dummy'),
-    # dcc.Input(id='word-in', value='madness', type='text'),
-    # html.Div(id='word-out', style={
-    #     "color": "tomato",
-    #     "text-align": "center",
-    #     "font-family": "Georgia"
-    # })
 ])
 
+
 # Band-aid fix for not really grokking async stuff here:
+# And even still, we're depending on the other callbacks running in the right order:
 @app.callback(
     Output('dummy', 'children'),
     [Input('freq-in', 'value')],
 )
-
 def on_change(input_value):
     return html.P(input_value)
 
-# Update the chart:
+
+# Update the first chart:
 @app.callback(
     Output('graph-out','children'),
     [Input('freq-in', 'value')],
 )
-
 def on_click(input_value):
     if (input_value == ''):
         return
-    # print(input_value)
     w = 10
-    n = 200
+    n = 500 # Controls the resolution
     ys = []
     y2s = []
     global xs
@@ -67,12 +61,12 @@ def on_click(input_value):
         'x': xs,
         'y': ys,
         'type': 'line',
-        'name': 'sine'
+        'name': 'sine1'
     }, {
         'x': xs,
         'y': y2s,
         'type': 'line',
-        'name': 'sine'
+        'name': 'sine2'
     }]
 
     return dcc.Graph(
@@ -91,38 +85,41 @@ def on_click(input_value):
     # Oh but this is also no good, because the values get recalculate inside of other callback...
     [Input('graph-out', 'children')], # We also changed this, though I think the global change was the effective one. In fact, changing it to watch the graph-1 change messed it up!
 )
-# Uh oh, this ran first... Fixed with global
+# Uh oh, this ran first... Fixed with global -- and new, alpha callback.
 def on_change(val):
     global current_lines
     global xs
-    # print(current_lines)
+
     summed_lines = {
-        'x': xs,
+        'x': list(filter(lambda x: x != 0, xs)), # Haha, well at least the extraneous lines are horizontal now...
         'y': [0] * len(xs), # Neat
         'type': 'line',
-        'name': 'summed_sines'
+        'name': 'summed'
+    }
+    # Dot product:
+    dotted_lines = {
+        'x': list(filter(lambda x: x != 0, xs)), # Haha, well at least the extraneous lines are horizontal now...
+        'y': [1] * len(xs), # Neat
+        'type': 'line',
+        'name': 'dotted'
     }
 
     for l in current_lines:
         for i, val in enumerate(l['y']):
             summed_lines['y'][i] += val
+            dotted_lines['y'][i] *= val
 
-    # print(summed_lines['y'])
-    summed_lines['y'] = summed_lines['y'][summed_lines['y'].index(0) : ]
+    # summed_lines['y'] = summed_lines['y'][summed_lines['y'].index(0) : ]
 
     return dcc.Graph(
             id = 'whatev2',
             figure = {
-                'data': [summed_lines],
+                'data': [summed_lines, dotted_lines], # Don't forget this must be an array
                 'layout': {
                     'title': 'Summed Waves'
                 }
             }
         )
-
-
-
-
 
 
 
