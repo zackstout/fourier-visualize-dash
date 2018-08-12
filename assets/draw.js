@@ -66,8 +66,8 @@ window.onload = function() {
 };
 
 function rotateLines() {
-  circ1.a += 0.1;
-  circ2.a += 0.2;
+  circ1.a += 0.05;
+  circ2.a += 0.1;
   drawCircles(circ1, circ2);
 }
 
