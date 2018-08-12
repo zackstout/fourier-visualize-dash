@@ -61,6 +61,8 @@ def on_click(input_value):
     y2s = []
     global xs
 
+    xs = []
+    
     for x in range(n):
         xs.append(x * w / n)
         ys.append(np.sin(int(input_value) * x * w / n))
@@ -102,18 +104,22 @@ def on_change(val):
     global current_lines
     global xs
 
+    # print('LENGTH ', len(xs)) # Yep, this is it, xs are never getting cleared out.
+
     summed_lines = {
         'x': list(filter(lambda x: x != 0, xs)), # Haha, well at least the extraneous lines are horizontal now...
         'y': [0] * len(xs), # Neat
         'type': 'line',
-        'name': 'summed'
+        'name': 'summed',
+        # 'connectgaps': False
     }
     # Dot product:
     dotted_lines = {
         'x': list(filter(lambda x: x != 0, xs)), # Haha, well at least the extraneous lines are horizontal now...
         'y': [1] * len(xs), # Neat
         'type': 'line',
-        'name': 'dotted'
+        'name': 'dotted',
+        # 'connectgaps': False
     }
 
     for l in current_lines:
