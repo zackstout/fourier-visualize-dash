@@ -19,3 +19,11 @@ Encoding a visualization of the Fourier transform to enrich my inuitions about i
 - Why does the Fourier Transform always produce harmonically related phasors? (Each spins at a speed which is a multiple of the first's speed)
 
 - If this is the case, maybe we *don't* need amplitude: we just have frequency of the wave controlling the size of its phasor. No, that seems wrong -- frequency needs to match up to spinning-time.
+- Dash has a nice `code_container` style.
+
+## Notes on Fourier:
+- Dot product provides measure of similarity between two waves.
+- Its magnitude tells us "how much" that certain sine wave is present in the original signal.
+- Need to *also* compute dot product with cosine waves so as not to miss anything.
+- We can then interpret these values as coordinates in the complex plane.
+- So the phasor magnitude (its radius) corresponds to its strength, and the rate at which line moves around it corresponds to its frequency.
