@@ -23,6 +23,7 @@ app.layout = html.Div([
     html.Div(id='graph-out'),
     html.Div(id='graph2-out'),
     html.Div(id='dummy'),
+    html.Canvas(id='canv')
 ])
 
 
@@ -34,6 +35,16 @@ app.layout = html.Div([
 )
 def on_change(input_value):
     return html.P(input_value)
+
+
+
+# @app.callback(
+#     Output('canv', 'style'),
+#     [Input('graph2-out', 'children')],
+# )
+# def on_change2(input_value):
+#     return {'background-color': 'green'};
+
 
 
 # Update the first chart:
@@ -80,6 +91,7 @@ def on_click(input_value):
         )
 
 
+# Update the second (cumulative) chart:
 @app.callback(
     Output('graph2-out','children'),
     # Oh but this is also no good, because the values get recalculate inside of other callback...
@@ -120,7 +132,6 @@ def on_change(val):
                 }
             }
         )
-
 
 
 if __name__ == '__main__':
