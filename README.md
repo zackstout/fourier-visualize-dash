@@ -6,6 +6,9 @@ Encoding a visualization of the Fourier transform to enrich my inuitions about i
 - Dash
 - Python
 
+## Animation
+![](https://media.giphy.com/media/lzJ7oEGGwM09GYQo2B/giphy.gif)
+
 ## Hopefuls
 - [ ] Create a button that adds new input fields, each of whose inputs controls a new line on the graph (or perhaps creates a new graph, re-spacing the graphs on the DOM?).
 - [ ] Sum up the sine waves to create a new sine wave.

@@ -5,53 +5,94 @@ from dash.dependencies import Input, Output, State, Event
 import dash_core_components as dcc
 import dash_html_components as html
 # from collections import defaultdict
+import plotly.graph_objs as go
 
 current_lines = []
 xs = []
+angle = 0
+
+# NOTE: Dash runs in threads. So callbacks should not modify global variables, or they could get threads out of sync.
 
 app = dash.Dash(__name__)
 server = app.server # Adding for deployment
 
+
+external_css = ["https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css",
+                "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css", ]
+for css in external_css:
+    app.css.append_css({"external_url": css})
+
 def makeSlider(id, min, max, step, value):
     return dcc.Slider(id=id, min=min, max=max, step=step, value=value, updatemode='drag')
+
+ratio = 5
 
 app.layout = html.Div([
     html.H2('LET\'S GET FOURIER!'),
     # dcc.Input(id='freq-in', value=1, type='int'),
     html.Div([
-        html.P('Wave 1 frequency:'),
-        makeSlider('w1_freq', 1, 20, 0.5, 1),
-        html.P('Wave 1 shift:'),
-        makeSlider('w1_shift', 0, 2*np.pi, 0.1, 0),
-        html.P('Wave 1 amplitude:'),
-        makeSlider('w1_amp', 0, 3, 0.1, 1),
-    ]),
-    html.Div([
-        html.P('Wave 2 frequency:'),
-        makeSlider('w2_freq', 0.5, 20, 0.5, 0.5),
-        html.P('Wave 2 shift:'),
-        makeSlider('w2_shift', 0, 2*np.pi, 0.1, 0),
-        html.P('Wave 2 amplitude:'),
-        makeSlider('w2_amp', 0, 3, 0.1, 1),
-    ]),
+        html.Div([
+            html.P('Wave 1 frequency:'),
+            makeSlider('w1_freq', 1, 20, 0.5, ratio),
+            html.P('Wave 1 shift:'),
+            makeSlider('w1_shift', 0, 2*np.pi, 0.1, 0),
+            html.P('Wave 1 amplitude:'),
+            makeSlider('w1_amp', 0, 3, 0.1, 1),
+        ], className="col-md-6 slides"),
+        html.Div([
+            html.P('Wave 2 frequency:'),
+            makeSlider('w2_freq', 0.5, 20, 0.5, ratio * 2 ** (12/12)), # This should represent the perfect fifth.
+            html.P('Wave 2 shift:'),
+            makeSlider('w2_shift', 0, 2*np.pi, 0.1, 0),
+            html.P('Wave 2 amplitude:'),
+            makeSlider('w2_amp', 0, 3, 0.1, 1),
+        ], className="col-md-6 slides")
+    ], className="row"),
     # html.Button('Add to chart', id='btn'),
     html.Div(id='graph-out'),
     html.Div(id='graph2-out'),
-    html.Div(id='dummy'),
-    html.Canvas(id='canv')
+    # html.Canvas(id='canv'),
+    # dcc.Graph(id='live-graph', animate=True),
+    # dcc.Interval(
+    #     id='graph-update',
+    #     interval=60
+    # ),
 ])
 
 
-# OK not sure what fixed this, but this is no longer needed:
-# Band-aid fix for not really grokking async stuff here:
-# And even still, we're depending on the other callbacks running in the right order:
 # @app.callback(
-#     Output('dummy', 'children'),
-#     [Input('w1_freq', 'value'), Input('w1_shift', 'value'), Input('w2_freq', 'value'), Input('w2_shift', 'value')],
+#     Output('live-graph', 'figure'),
+#     events=[Event('graph-update', 'interval')]
 # )
-# def on_change(val1, val2, val3, val4):
-#     return html.P(val1)
-
+# def update_live_graph():
+#     # X.append(X[-1]+1)
+#     # Y.append(Y[-1]+Y[-1]*random.uniform(-0.1,0.1))
+#     global angle
+#     angle += 0.1
+#     xs = np.linspace(0,5,50)
+#     ys = np.linspace(0,5,50)
+#     new_xs = [x * np.cos(angle) for x in xs]
+#     new_ys = [y * np.sin(angle) for y in ys]
+#
+#     # Create the graph:
+#     data = go.Line(
+#         x=new_xs,
+#         y=new_ys,
+#         name='line',
+#         # mode='lines+markers'
+#     )
+#
+#     layout = go.Layout(
+#     xaxis=dict(
+#         range=[-5, 5]
+#     ),
+#     yaxis=dict(
+#         range=[-5, 5]
+#     )
+#     )
+#
+#     # Send back the figure to our live-graph
+#     return {'data': [data], 'layout': layout}
 
 
 
@@ -101,8 +142,6 @@ def on_click(w1_freq, w1_shift, w1_amp, w2_freq, w2_shift, w2_amp):
 
 
 
-
-
 # Update the second (cumulative) chart:
 @app.callback(
     Output('graph2-out','children'),
@@ -143,7 +182,6 @@ def on_change(val):
                 }
             }
         )
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)

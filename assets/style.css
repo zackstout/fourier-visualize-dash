@@ -3,3 +3,11 @@
   max-width: 200px;
   padding-left: 40px;
 }
+
+#live-graph {
+  max-width: 500px;
+}
+
+.slides {
+  padding-left: 50px;
+}
